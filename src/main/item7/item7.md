@@ -1,20 +1,12 @@
 # item 7. 다 쓴 객체 참조를 해제하라
 
-### 메모리누수
+자바는 가비지 컬렉터를 갖춘 언어로 다 쓴 객체를 알아서 회수해준다. 그렇다고 메모리 관리에 더 이상 신경을 쓰지않아도 되는건 아니다.
 
-자바는 가비지 컬렉터를 갖춘 언어로 다 쓴 객체를 알아서 회수해준다.
-
-그렇다고 메모리 관리에 더 이상 신경을 쓰지않아도 되는건 아니다.
-
-__어떤 객체에 대한 레퍼런스가 남아있다면 해당 객체는 가비지 컬렉션의 대상이 되지 않는다.__
-
-
-
-스택을 간단히 구현한 다음 코드를 보자.
+스택을 간단히 구현한 코드로 살펴보자
 
 ```java
 public class Stack {
-	private Object[] elements;
+  private Object[] elements;
   private int size = 0;
   private static final int DEFAULT_INITIAL_CAPACITY = 16;
   
@@ -27,31 +19,25 @@ public class Stack {
     elements[size++] = e;
   }
 	
-	public Object pop() {
-		if (size == 0) {
-			throw new EmptyStackException();
-		}
-		return elements[--size];
-	}
-  
-  /**
-    * 원소를 위한 공간을 적어도 하나 이상 확보한다.
-    * 배열 크기를 늘려야 할 때마다 대략 두 배씩 늘린다.
-    */
-    private void ensureCapacity() {
-        if (elements.length == size)
-            elements = Arrays.copyOf(elements, 2 * size + 1);
+  public Object pop() {
+    if (size == 0) {
+      throw new EmptyStackException();
+    }
+    return elements[--size];
+}
+
+  private void ensureCapacity() {
+    if (elements.length == size)
+      elements = Arrays.copyOf(elements, 2 * size + 1);
     }
 }
 ```
 
-이 코드에서는 스택이 커졌다가 줄어들었을 때 스택에서 꺼내진 객체들을 가비지 컬렉터가 회수하지 않는 문제가 발생하여 프로그램을 오래 실행하다 보면 점차 성능이 저하될 것이다.
-
-pop() 메서드로 참조하는 size가 줄어들게 되면 앞으로는 다시 쓰이지 않게 되지만 가비지 컬렉터는 이것을 알아차리지 못하고 회수하지 않는다.
+이 코드에서는 pop() 메서드로 참조하는 size가 줄어들게 되면 앞으로는 다시 쓰이지 않게 되지만 가비지 컬렉터는 이것을 알아차리지 못하고 회수하지 않는다.
 
 이것을 다 쓴 참조(obsolete reference)라 한다.
 
-
+<br>
 
 ### 다 쓴 참조(obsolete reference) 해법
 
@@ -63,19 +49,19 @@ pop() 메서드로 참조하는 size가 줄어들게 되면 앞으로는 다시 
 
 ```java
 public Object pop() {
-	if (size == 0) 
-			throw new EmptyStackException();
-	object result = elements[--size];
-	elements[size] = null; // 다 쓴 참조 해제
-	return result;
+  if (size == 0) 
+    throw new EmptyStackException();
+  object result = elements[--size];
+  elements[size] = null; // 다 쓴 참조 해제
+  return result;
 }
 ```
 
 만약 null 처리한 참조를 실수로 사용하려 하면 프로그램은 즉시 NullPointException을 던지며 종료하여 프로그램 오류를 빠르게 잡을 수 있다.
 
+<br>
 
-
-### null 처리하는 일은 예외적이어야 한다.
+## null 처리하는 일은 예외적이어야 한다.
 
 그렇다고 필요 없는 객체를 볼 때마다 null 처리하면, 오히려 프로그램을 필요 이상으로 지저분하게 만든다.
 
@@ -85,16 +71,14 @@ public Object pop() {
 
 ```java
 public Object pop() {
-	Object size = 10;
+  Object size = 10;
   ...
 }
 ```
 
-size는 scope이 pop() 안에서만 형성되어 있으므로 scope 밖으로 나가면 무의미한 레퍼런스 변수가 되기 때문에 GC에 의해 정리가 되어 굳이 null 처리 하지않아도 된다.
+<br>
 
-
-
-### 메모리 누수에 취약한 이유
+## 메모리 누수에 취약한 이유
 
 그렇다면 null 처리는 언제 해야할까? stack 클래스는 왜 메모리 누수에 취약할까?
 
@@ -116,9 +100,9 @@ size는 scope이 pop() 안에서만 형성되어 있으므로 scope 밖으로 �
 
 일반적으로 자기 메모리를 직접관리하는 클래스라면 프로그래머는 항시 메모리 누수에 주의해야한다.
 
+<br>
 
-
-### 캐시 역시 메모리 누수를 일으키는 주범이다.
+## 캐시 역시 메모리 누수를 일으키는 주범이다.
 
 캐시를 사용할 때도 메모리 누수 문제를 조심해야 한다. 객체의 레퍼런스를 캐시에 넣어 놓고, 캐시를 비우는 것을 잊기 쉽다.
 
@@ -126,9 +110,9 @@ size는 scope이 pop() 안에서만 형성되어 있으므로 scope 밖으로 �
 
 > 캐시의 경우 시간이 지남에 따라 사용되지 않으면 그 가치를 떨어트리는 방법을 사용한다.
 
+<br>
 
-
-### WeakHashMap
+## WeakHashMap
 
 HashMap 같은 경우는 어떤 객체가 null이 되어 버리면 해당 객체를 key로 하는 HashMap의 value 값도 더이상 꺼낼 일이 없는 경우가 발생하여 메모리를 차지한다.
 
@@ -136,9 +120,9 @@ HashMap 같은 경우는 어떤 객체가 null이 되어 버리면 해당 객체
 
 > 주의할점 - WeakHashMap에 key로 String은 적합하지 못하다 String은 JVM에 의해 다른 곳에 store 되어 항상 strong reference로 남아있기 때문이다. (사용하고 싶으면 new로 생성)
 
+<br>
 
-
-### Java Reference 종류
+## Java Reference 종류
 
 자바는 효율적인 GC를 처리하기 위한 reference가 여러종류가 있어  개발자는 적절한 reference를 사용하여 GC에 의해 제거될 데이터 우선순위를 적용하여 좀 더 효율적인 메모리 관리를 할 수 있다.
 
@@ -146,7 +130,7 @@ Reference는 4가지 종류 `Strong Reference`,`Soft Reference `,`Weak Reference
 
 
 
-- Strong Reference
+### Strong Reference
 
 우리가 자주 사용하는 객체 만들 때 모든 래퍼런스는 전부 Strong reference이다
 
@@ -158,7 +142,7 @@ Integer prime = 1;
 
 
 
-- Soft Reference
+### Soft Reference
 
 ```java
 Integer prime = 1;  
@@ -170,7 +154,7 @@ prime = null;
 
 
 
-- Weak Reference
+### Weak Reference
 
 ```java
 Integer prime = 1;  
@@ -182,7 +166,7 @@ prime = null;
 
 
 
-- Phantom Reference
+### Phantom Reference
 
 GC 과정은 여러 단계로 나뉜다.
 GC 대상 객체를 찾는 작업, 객체를 처리(finalize), 메모리를 회수하는 작업
@@ -199,9 +183,9 @@ GC가 객체를 처리하는 순서는 다음과 같다.
 따라서 finalize() 이후에 처리해야하는 리소스 정리 작업을 할 때 개발자가 관여할 수 있다.
 하지만 거의 안쓰인다.
 
+<br>
 
-
-### 리스너, 콜백
+## 리스너, 콜백
 
 클라이언트 코드가 콜백을 등록할 수 있는 API를 만들고 콜백을 뺼 수 있는 방법을 제공하지 않는다면, 계속해서 콜백이 쌓이기만 할 것이다. 이것 역시 `WeakHashMap`을 사용해서 콜백을 Weak 레퍼런스로 저장하면 GC가 이를 즉시 수거해 해결할 수 있다.
 
