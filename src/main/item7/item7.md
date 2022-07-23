@@ -2,7 +2,7 @@
 
 자바는 가비지 컬렉터를 갖춘 언어로 다 쓴 객체를 알아서 회수해준다. 그렇다고 메모리 관리에 더 이상 신경을 쓰지않아도 되는건 아니다.
 
-스택을 간단히 구현한 코드로 살펴보자
+그 이유는 스택을 간단히 구현한 코드로 살펴보자
 
 ```java
 public class Stack {
@@ -33,17 +33,15 @@ public class Stack {
 }
 ```
 
-이 코드에서는 pop() 메서드로 참조하는 size가 줄어들게 되면 앞으로는 다시 쓰이지 않게 되지만 가비지 컬렉터는 이것을 알아차리지 못하고 회수하지 않는다.
+pop() 메서드로 참조하는 size가 줄어들게 되면 앞으로는 다시 쓰이지 않게 되지만 가비지 컬렉터는 이것을 알아차리지 못하고 회수하지 않는다.
 
-이것을 다 쓴 참조(obsolete reference)라 한다.
+이처럼 다시 쓰이지 않지만 가비지 컬렉터가 회수하지않는 참조를 다 쓴 참조(obsolete reference)라 한다.
 
 <br>
 
 ### 다 쓴 참조(obsolete reference) 해법
 
 해법은 해당 참조를 다 썻을 때 null 처리(참조 해제)하면 된다.
-
-스택 클래스에서는 각 원소의 참조가 더 이상 필요 없어지는 시점은 스택에서 꺼내질 때다.
 
 다음은 pop 메서드를 제대로 구현한 모습이다.
 
@@ -63,7 +61,7 @@ public Object pop() {
 
 ## null 처리하는 일은 예외적이어야 한다.
 
-그렇다고 필요 없는 객체를 볼 때마다 null 처리하면, 오히려 프로그램을 필요 이상으로 지저분하게 만든다.
+필요 없는 객체를 볼 때마다 null 처리하면, 오히려 프로그램을 필요 이상으로 지저분하게 만든다.
 
 필요없는 객체 레퍼런스를 정리하는 최선책은 그 레퍼런스를 가리키는 변수를 특정한 범위(scope)안에서만 사용하는 것이다. 변수의 범위를 가능한 최소가 되게 정의했다면(item 57) 이 일은 자연스럽게 이뤄진다.
 
@@ -126,7 +124,7 @@ HashMap 같은 경우는 어떤 객체가 null이 되어 버리면 해당 객체
 
 자바는 효율적인 GC를 처리하기 위한 reference가 여러종류가 있어  개발자는 적절한 reference를 사용하여 GC에 의해 제거될 데이터 우선순위를 적용하여 좀 더 효율적인 메모리 관리를 할 수 있다.
 
-Reference는 4가지 종류 `Strong Reference`,`Soft Reference `,`Weak Reference`, `Phantom Reference` 로 구분되어 있으며, 뒤로 갈수록 GC에 의해 제거될 우선순위가 높다.
+Reference는 4가지 종류 `Strong Reference`,`Soft Reference`,`Weak Reference`, `Phantom Reference` 로 구분되어 있으며, 뒤로 갈수록 GC에 의해 제거될 우선순위가 높다.
 
 
 
@@ -150,7 +148,8 @@ SoftReference<Integer> soft = new SoftReference<Integer>(prime);
 prime = null;
 ```
 
-(최초 생성 시점에 이용 대상이 되었던 Strong Reference) 은 없고 대상을 참조하는 객체가 SoftReference만 존재할 경우 GC대상으로 들어가도록 JVM은 동작한다.  다만 WeakReference 와의 차이점은 메모리가 부족하지 않으면 굳이 GC하지 않는 점이다.
+최초 생성 시점에 이용 대상이 되었던 Strong Reference 은 없고 대상을 참조하는 객체가 Soft Reference만 존재할 경우 GC대상으로 들어가도록 JVM은 동작한다.
+하지만 메모리가 부족하지 않으면 굳이 GC를 수행하지 않는다.
 
 
 
@@ -162,22 +161,23 @@ WeakReference<Integer> soft = new WeakReference<Integer>(prime);
 prime = null;
 ```
 
-해당 객체를 가리키는 참조가 WeakReference 뿐일 경우 GC 대상이 된다.
+해당 객체를 가리키는 참조가 Weak Reference 뿐일 경우 GC 대상이 된다. 메모리가 부족하지 않아도 바로 GC에 대상이 된다.
 
 
 
 ### Phantom Reference
 
 GC 과정은 여러 단계로 나뉜다.
-GC 대상 객체를 찾는 작업, 객체를 처리(finalize), 메모리를 회수하는 작업
+- GC 대상 객체를 찾는 작업
+- 객체를 처리(finalize)
+- 메모리를 회수하는 작업
 
 Soft Reference, Weak Reference는 GC 대상 객체를 찾는 작업에 개발자가 관여할 수 있게 해준다.
 
 하지만 Phantom Reference는 finalize , 메모리를 회수하는 것에 관여한다.
 
-GC가 객체를 처리하는 순서는 다음과 같다.
-
-**Strong Ref > Soft Ref > Weak Ref > finalize > phantom Ref > 메모리 회수**
+> GC가 객체를 처리하는 순서는 다음과 같다.
+> Strong Ref > Soft Ref > Weak Ref > finalize > phantom Ref > 메모리 회수
 
 객체가 Strong,Soft, Weak 참조에 의해 참조되는지 판단하고 모두 아니면 finalize를 진행하고 phantom 여부를 판단한다.
 따라서 finalize() 이후에 처리해야하는 리소스 정리 작업을 할 때 개발자가 관여할 수 있다.
