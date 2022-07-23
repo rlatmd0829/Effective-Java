@@ -33,7 +33,7 @@ public class Stack {
 }
 ```
 
-pop() 메서드로 참조하는 size가 줄어들게 되면 앞으로는 다시 쓰이지 않게 되지만 래퍼런스가 남아있어 가비지 컬렉터는 사용하는 객체인지 사용하지 않는 객체인지 판단을 못한다.
+pop() 메서드로 참조하는 size가 줄어들게 되면 앞으로는 다시 쓰이지 않게 되지만 래퍼런스가 남아있어 가비지 컬렉터는 사용하는 객체인지 사용하지 않는 객체인지 판단을 못하여 회수하지 않는다.
 
 이처럼 다시 쓰이지 않지만 가비지 컬렉터가 회수하지않는 참조를 다 쓴 참조(obsolete reference)라 한다.
 
@@ -111,12 +111,19 @@ Integer prime = 1;
 ### Soft Reference
 
 ```java
-Integer prime = 1;  
-SoftReference<Integer> soft = new SoftReference<Integer>(prime); 
-prime = null;
+Printer printer = new Printer();
+SoftReference<Printer> softReference = new SoftReference<>(printer); 
+printer = null;
 ```
 
-최초 생성 시점에 이용 대상이 되었던 Strong Reference 은 없고 대상을 참조하는 객체가 Soft Reference만 존재할 경우 GC대상으로 들어가도록 JVM은 동작한다.
+<img width="692" alt="image" src="https://user-images.githubusercontent.com/70622731/180609164-fc7ed36f-aa9b-40e9-b7ab-0e22f878aefb.png">
+
+> https://luckydavekim.github.io/development/back-end/java/soft-reference-in-java
+
+
+
+최초 생성 시점에 이용 대상이 되었던 Strong Reference 은 없고 해당 객체를 참조하는 객체가 Soft Reference만 존재할 경우 GC 대상이 된다.
+
 하지만 메모리가 부족하지 않으면 굳이 GC를 수행하지 않는다.
 
 
@@ -124,12 +131,14 @@ prime = null;
 ### Weak Reference
 
 ```java
-Integer prime = 1;  
-WeakReference<Integer> weak = new WeakReference<Integer>(prime); 
-prime = null;
+Printer printer = new Printer(); 
+WeakReference<Printer> weakReference = new WeakReference<>(printer); 
+printer = null;
 ```
 
-해당 객체를 가리키는 참조가 Weak Reference 뿐일 경우 GC 대상이 된다. 메모리가 부족하지 않아도 바로 GC에 대상이 된다.
+최초 생성 시점에 이용 대상이 되었던 Strong Reference 은 없고 해당 객체를 참조하는 객체가 Weak Reference만 존재할 경우 GC 대상이 된다. 
+
+메모리가 부족하지 않아도 바로 GC에 대상이 된다.
 
 
 
