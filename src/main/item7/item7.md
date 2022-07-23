@@ -33,7 +33,7 @@ public class Stack {
 }
 ```
 
-pop() 메서드로 참조하는 size가 줄어들게 되면 앞으로는 다시 쓰이지 않게 되지만 가비지 컬렉터는 이것을 알아차리지 못하고 회수하지 않는다.
+pop() 메서드로 참조하는 size가 줄어들게 되면 앞으로는 다시 쓰이지 않게 되지만 래퍼런스가 남아있어 가비지 컬렉터는 사용하는 객체인지 사용하지 않는 객체인지 판단을 못한다.
 
 이처럼 다시 쓰이지 않지만 가비지 컬렉터가 회수하지않는 참조를 다 쓴 참조(obsolete reference)라 한다.
 
@@ -65,7 +65,7 @@ public Object pop() {
 
 필요없는 객체 레퍼런스를 정리하는 최선책은 그 레퍼런스를 가리키는 변수를 특정한 범위(scope)안에서만 사용하는 것이다. 변수의 범위를 가능한 최소가 되게 정의했다면(item 57) 이 일은 자연스럽게 이뤄진다.
 
--> 변수를 지역변수로 선언하여 범위를 벗어 난다면 자연스럽게 가비지 컬렉션에 대상이 되도록 하면 null 처리할 필요가 없다.
+-> 변수를 지역변수로 선언하여 범위를 벗어나 자연스럽게 가비지 컬렉션에 대상이 되도록 하면 null 처리할 필요가 없다.
 
 ```java
 public Object pop() {
@@ -73,22 +73,6 @@ public Object pop() {
   ...
 }
 ```
-
-<br>
-
-## 메모리 누수에 취약한 이유
-
-그렇다면 null 처리는 언제 해야할까? stack 클래스는 왜 메모리 누수에 취약할까?
-
-바로 스택이 자기 메모리를 직접 관리하기 때문이다.
-
-
-
-이 스택은 elements 배열로 저장소 풀을 만들어 원소들을 관리한다.
-
-pop으로 인해 사용하지 않게되는 순간 null 처리해서 해당 객체를 더는 쓰지 않을 것임을 가비지 컬렉터에 알려야한다.
-
-가비지 컬렉터는 사용하지 않는 객체인지 사용하는 객체인지 판단하지 못하기 때문이다.
 
 <br>
 
@@ -102,21 +86,13 @@ pop으로 인해 사용하지 않게되는 순간 null 처리해서 해당 객�
 
 <br>
 
-## WeakHashMap
-
-HashMap 같은 경우는 어떤 객체가 null이 되어 버리면 해당 객체를 key로 하는 HashMap의 value 값도 더이상 꺼낼 일이 없는 경우가 발생하여 메모리를 차지한다.
-
-하지만 캐시 값이 무의미해진다면 자동으로 처리해주는 WeakHashMap은 key 값을 모두 Weak 레퍼런스로 감싸 Strong reference가 없어진다면 GC의 대상이 된다.
-
-> 주의할점 - WeakHashMap에 key로 String은 적합하지 못하다 String은 JVM에 의해 다른 곳에 store 되어 항상 strong reference로 남아있기 때문이다. (사용하고 싶으면 new로 생성)
-
-<br>
-
 ## Java Reference 종류
 
-자바는 효율적인 GC를 처리하기 위한 reference가 여러종류가 있어  개발자는 적절한 reference를 사용하여 GC에 의해 제거될 데이터 우선순위를 적용하여 좀 더 효율적인 메모리 관리를 할 수 있다.
+자바는 효율적인 GC를 처리하기 위한 reference 4가지가 있다.
 
-Reference는 4가지 종류 `Strong Reference`,`Soft Reference`,`Weak Reference`, `Phantom Reference` 로 구분되어 있으며, 뒤로 갈수록 GC에 의해 제거될 우선순위가 높다.
+개발자는 적절한 reference를 사용하여 GC에 의해 제거될 데이터 우선순위를 적용하여 좀 더 효율적인 메모리 관리를 할 수 있게 된다.
+
+Reference는 `Strong Reference`,`Soft Reference`,`Weak Reference`, `Phantom Reference` 로 구분되어 있으며, 뒤로 갈수록 GC에 의해 제거될 우선순위가 높다.
 
 
 
@@ -149,7 +125,7 @@ prime = null;
 
 ```java
 Integer prime = 1;  
-WeakReference<Integer> soft = new WeakReference<Integer>(prime); 
+WeakReference<Integer> weak = new WeakReference<Integer>(prime); 
 prime = null;
 ```
 
@@ -166,7 +142,7 @@ GC 과정은 여러 단계로 나뉜다.
 
 Soft Reference, Weak Reference는 GC 대상 객체를 찾는 작업에 개발자가 관여할 수 있게 해준다.
 
-하지만 Phantom Reference는 finalize , 메모리를 회수하는 것에 관여한다.
+하지만 Phantom Reference는 객체를 처리(finalize) , 메모리를 회수하는 것에 관여한다.
 
 > GC가 객체를 처리하는 순서는 다음과 같다.
 > Strong Ref > Soft Ref > Weak Ref > finalize > phantom Ref > 메모리 회수
@@ -174,6 +150,16 @@ Soft Reference, Weak Reference는 GC 대상 객체를 찾는 작업에 개발자
 객체가 Strong,Soft, Weak 참조에 의해 참조되는지 판단하고 모두 아니면 finalize를 진행하고 phantom 여부를 판단한다.
 따라서 finalize() 이후에 처리해야하는 리소스 정리 작업을 할 때 개발자가 관여할 수 있다.
 하지만 거의 안쓰인다.
+
+<br>
+
+## WeakHashMap
+
+HashMap 같은 경우는 어떤 객체가 null이 되어 버리면 해당 객체를 key로 하는 HashMap의 value 값도 더이상 꺼낼 일이 없는 경우가 발생하여 메모리를 차지한다.
+
+하지만 캐시 값이 무의미해진다면 자동으로 처리해주는 WeakHashMap은 key 값을 모두 Weak 레퍼런스로 감싸 Strong reference가 없어진다면 GC의 대상이 된다.
+
+> 주의할점 - WeakHashMap에 key로 String은 적합하지 못하다 String은 JVM에 의해 다른 곳에 store 되어 항상 strong reference로 남아있기 때문이다. (사용하고 싶으면 new로 생성)
 
 <br>
 
