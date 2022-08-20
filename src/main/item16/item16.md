@@ -4,8 +4,8 @@
 
 ```java
 class Point {
-	public double x;
-	public double y;
+  public double x;
+  public double y;
 }
 ```
 
@@ -26,19 +26,19 @@ class Point {
 
 ```java
 class Point {
-	private double x;
-	private double y;
+  private double x;
+  private double y;
 	
-	public Point(double x, double y) {
-		this.x = x;
-		this.y = y;
-    }
+  public Point(double x, double y) {
+    this.x = x;
+    this.y = y;
+  }
 	
-	public double getX() { return x; }
-	public double getY() { return y; }
+  public double getX() { return x; }
+  public double getY() { return y; }
 	
-	public void setX(double x) { return this.x = x; }
-	public void setY(double y) { return this.y = y; }
+  public void setX(double x) { return this.x = x; }
+  public void setY(double y) { return this.y = y; }
 }
 ```
 
