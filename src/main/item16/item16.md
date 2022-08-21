@@ -66,6 +66,8 @@ public Dimension getSize() {
 }
 ```
 
+> 방어적 복사 : https://tecoble.techcourse.co.kr/post/2021-04-26-defensive-copy-vs-unmodifiable/
+
 ## 핵심정리
 
 public 클래스는 절대 가변 필드를 직접 노출해서는 안된다. 불변 필드라면 노출해도 덜 위험하지만 완전히 안심할 수는 없다.
