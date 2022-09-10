@@ -3,7 +3,7 @@
 ## 중첩클래스
 다른 클래스 안에 정의된 클래스를 말한다.
 - 자신을 감싼 바깥 클래스에서만 사용되어야 한다.
-- 중첩 클래스를 사용함으로써 불필요한 노출을 줄여 캡슐화를 할 수 있고 가독성 좋고 유지보수하기 좋은 코드를 작성할 수 있다.
+- 중첩 클래스를 사용함으로써 불필요한 노출을 줄여 캡슐화를 할 수 있고 유지보수하기 좋은 코드를 작성할 수 있다.
 
 
 ### 중첩 클래스 종류
@@ -28,7 +28,7 @@ class Outer {
     }
 }
 ```
-- 정적 내부 클래스는 외부 클래스의 private 멤버에도 접근할 수 있다는 점만 제외하고는 일반 클래스와 똑같다.
+- 정적 멤버 클래스는 외부 클래스의 private 멤버에도 접근할 수 있다는 점만 제외하고는 일반 클래스와 똑같다.
 
 ```java
 // 정적 멤버클래스 인스턴스 생성
@@ -62,7 +62,7 @@ class Outer {
        private int in;
 
        void accessOuter(){
-           Outer.this.create();
+           Outer.this.create(); // 정규화된 this (클래스명.this)
        }
     }
 }
@@ -81,7 +81,7 @@ Outer.Inner inner = outer.new Inner();
 
 예컨대 Map 인터페이스의 구현체들은 보통(KeySet, entrySet, values 메서드가 반환하는) 자신의 컬렉션 뷰를 구현할 때 비정적 멤버 클래스를 사용한다.
 
-> 예를 들어 HashMap의 keySet()을 사용하면 Map의 key의 해당하는 값들을 Set으로 반환해 주는데 어댑터 패턴을 이용해서 Map을 Set으로 제공한다.  
+> 예를 들어 HashMap의 keySet()을 사용하면 Map의 key의 해당하는 값들을 Set으로 반환할 때 어댑터 패턴을 이용해서 Map을 Set으로 제공한다.  
 > 참고 : https://insight-bgh.tistory.com/409
 
 비슷하게, Set과 List 같은 다른 컬렉션 인터페이스 구현들도 자신의 반복자를 구현할 때 비정적 멤버 클래스를 주로 사용한다.
@@ -101,7 +101,7 @@ public class MySet<E> extends AbstractSet {
 
 ### 멤버 클래스에서 바깥 인스턴스에 접근할 일이 없다면 무조건 static을 붙여서 정적 멤버 클래스로 만들자.
 
-static을 생략하면 바깥 인스턴스로의 숨은 외부 참조를 갖게된다. 이 참조를 저장하려면 시간과 공간이 소비된다.
+비정적 멤버 클래스를 사용하면 바깥 인스턴스로의 숨은 외부 참조를 갖게된다. 이 참조를 저장하려면 시간과 공간이 소비된다.
 
 더 심각한 문제는 가비지 컬렉션이 바깥 클래스의 인스턴스를 수거하지 못하도록 하는 메모리 누수가 생길 수도 있다.
 
@@ -117,18 +117,19 @@ public class TestClass {
     Integer intInstance = 10;
     
     void doX() {
-        new SInterface() {
+        SInterface sInterface = new SInterface() {
             @Override
-            public void doSometing() {
+            public void doSomething() {
                 //바깥 인스턴스 참조
                 System.out.println(intInstance);
             }
         };
+	sInterface.doSomethint();
     }
 }
     
 interface SInterface {
-    void doSometing();
+    void doSomething();
 }
 ```
 
