@@ -82,6 +82,9 @@ Outer.Inner inner = outer.new Inner();
 
 예컨대 Map 인터페이스의 구현체들은 보통(KeySet, entrySet, values 메서드가 반환하는) 자신의 컬렉션 뷰를 구현할 때 비정적 멤버 클래스를 사용한다.
 
+> 예를 들어 HashMap의 keySet()을 사용하면 Map의 key의 해당하는 값들을 Set으로 반환해 주는데 어댑터 패턴을 이용해서 Map을 Set으로 제공한다.  
+> 참고 : https://insight-bgh.tistory.com/409
+
 비슷하게, Set과 List 같은 다른 컬렉션 인터페이스 구현들도 자신의 반복자를 구현할 때 비정적 멤버 클래스를 주로 사용한다.
 
 ```java
@@ -125,7 +128,7 @@ public class TestClass {
     }
 }
     
-    interface SInterface {
+interface SInterface {
     void doSometing();
 }
 ```
