@@ -86,6 +86,8 @@ public void popAll(Collection<? super E> dst) {
 ### item30-2 union 메서드에 와일드카드 적용
 
 ```java
+public static <E> Set<E> union(Set<E> s1, Set<E> s2)
+
 public static <E> Set<E> union(Set<? extends E> s1, Set<? extends E> s2) {
     ...
 }
@@ -99,7 +101,36 @@ item30에서 나왔던 union 메서드를 PECS 공식에 따라 와일드카드 
 ### item30-7 max 메서드에 와일드카드 적용
 
 ```java
+public static <E extends Comparable<E>> E max(List<E> list) {
+    ...
+}
+
 public static <E extends Comparable<? super E>> E max(List<? extends E> list) {
     ...
 }
 ```
+
+- 입력 매개변수 : E 인스턴스를 생산하므로 원래의 `List<E>`를 `List<? extends E>`로 수정하였다.
+
+- 타입 매개변수 : E가 `Comparable<E>`를 확장하는 개념이고 이때 Comparable은 언제나 소비자이므로 `Comparable<E>`는 E 인스턴스를 소비한다. 그래서 `Comparable<? super E>`로 수정할 수 있다.
+
+<br>
+
+## 타입 매개변수와 와일드카드
+
+타입 매개변수와 와일드카드에는 공통되는 부분이 있어서, 메서드를 정의할 때 둘 중 어느 것을 사용해도 괜찮을 때가 많다.
+
+### swap 메서드의 두가지 선언
+
+```java
+public static <E> void swap(List<E> list, int i, int j);
+public static void swap(List<?> list, int i, int j);
+```
+
+public API라면 간단한 두 번째가 낫다. 어떤 리스트든 이 메서드에 넘기면 명시한 인덱스의 원소들을 교환해 줄 것이다. 신경써야할 타입 매개변수도 없다.
+
+즉, 메서드 선언에 타입 매개변수가 한 번만 나오면 와일드카드로 대체하면 된다.
+
+
+
+
