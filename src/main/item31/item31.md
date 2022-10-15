@@ -1,10 +1,12 @@
 # item 31. 한정적 와일드카드를 사용해 API 유연성을 높이라
 
-## 불공변인 매개변수화 타입
+## 불공변인 제네릭 타입
 
 서로 다른 Type1 Type2가 있을 때 `List<Type1>`은 `List<Type2>`의 하위 타입도 상위 타입도 아니다.
 
 `List<Object>` 에는 어떤 객체든 넣을 수 있지만 `List<String>`에는 문자열만 넣을 수 있기 때문에 리스코프 치환 원칙에 어긋나 하위타입이 될 수 없다.
+
+<br>
 
 ## 한정적 와일드카드 타입 - 생산자
 
@@ -17,8 +19,6 @@ public void pushAll(Iterable<E> src) {
     }	
 }
 ```
-
-src 매개 변수는 stack이 사용할 E 인스턴스를 생산하므로 생산자라고 볼 수 있다.
 
 ```java
 Stack<Number> numberStack = new Stack<>();
@@ -42,6 +42,8 @@ public void pushAll(Iterable<? extends E> src) {
 
 `Iterable<? extends E>`는 E의 iterable이 아니라 E의 하위 타입의 Iterable이어야 한다는 의미를 갖는다.
 
+매개 변수 src는 stack이 사용할 E 인스턴스를 생산하므로 생산자라고 볼 수 있다.
+
 <br>
 
 ## 한정적 와일드카드 타입 - 소비자
@@ -56,7 +58,6 @@ public void popAll(Collection<E> dst) {
 }
 ```
 
-dst 매개변수는 Stack으로부터 E 인스턴스를 소비하므로 소비자라고 볼 수 있다.
 
 ```java
 Stack<Number> numberStack = new Stack<>();
@@ -76,6 +77,8 @@ public void popAll(Collection<? super E> dst) {
 }
 ```
 
+매개변수 dst는 Stack으로부터 E 인스턴스를 소비하므로 소비자라고 볼 수 있다.
+
 <br>
 
 ## 펙스(PECS) : producer - extends, consumer - super
@@ -86,14 +89,16 @@ public void popAll(Collection<? super E> dst) {
 ### item30-2 union 메서드에 와일드카드 적용
 
 ```java
-public static <E> Set<E> union(Set<E> s1, Set<E> s2)
+public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
+    ...
+}
 
 public static <E> Set<E> union(Set<? extends E> s1, Set<? extends E> s2) {
     ...
 }
 ```
 
-item30에서 나왔던 union 메서드를 PECS 공식에 따라 와일드카드 타입을 적용한 것이다.
+s1과 s2 모두 생산자이니 PECS 공식에 따라 다음처럼 선언할 수 있습니다.
 
 > 반환타입에는 한정적 와일드 카드 타입을 사용하면 안된다. 유연성을 높여주기는 커녕 클라이언트 코드에서 와일드카드 타입을 사용해야하기 때문이다.  
 > 즉, 클래스 사용자가 와일드카드 타입을 신경써야 한다면 그 API에 무슨 문제가 있을 가능성이 크다.
