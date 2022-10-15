@@ -42,6 +42,8 @@ public void pushAll(Iterable<? extends E> src) {
 
 `Iterable<? extends E>`는 E의 iterable이 아니라 E의 하위 타입의 Iterable이어야 한다는 의미를 갖는다.
 
+즉, E의 하위타입을 받겠다는 의미이다.
+
 매개 변수 src는 stack이 사용할 E 인스턴스를 생산하므로 생산자라고 볼 수 있다.
 
 <br>
@@ -65,7 +67,7 @@ Collection<Object> objects = ...;
 numberStack.popAll(objects);
 ```
 
-`Collection<Object>`는 `Collections<Number>`의 하위 타입이 아니기 때문에 오류가 발생한다. 이번 상황역시 와일드카드 타입으로 해결이 가능하다.
+이번 상황역시 위와 비슷한 에러가 발생하는데, 이를 와일드카드 타입으로 해결이 가능하다.
 
 ### 와일드카드를 사용한 popAll 메서드
 
@@ -76,6 +78,7 @@ public void popAll(Collection<? super E> dst) {
     }
 }
 ```
+위와 마찬가지로 E의 상위타입을 받겠다는 의미이다.
 
 매개변수 dst는 Stack으로부터 E 인스턴스를 소비하므로 소비자라고 볼 수 있다.
 
@@ -98,7 +101,7 @@ public static <E> Set<E> union(Set<? extends E> s1, Set<? extends E> s2) {
 }
 ```
 
-s1과 s2 모두 생산자이니 PECS 공식에 따라 다음처럼 선언할 수 있습니다.
+s1과 s2 E인스턴스를 생성하여 모두 생산자이니 PECS 공식에 따라 다음처럼 선언할 수 있다.
 
 > 반환타입에는 한정적 와일드 카드 타입을 사용하면 안된다. 유연성을 높여주기는 커녕 클라이언트 코드에서 와일드카드 타입을 사용해야하기 때문이다.  
 > 즉, 클래스 사용자가 와일드카드 타입을 신경써야 한다면 그 API에 무슨 문제가 있을 가능성이 크다.
