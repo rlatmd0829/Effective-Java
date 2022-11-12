@@ -13,7 +13,7 @@ public interface Serializable {
 ```
 자바에서 직렬화를 사용하고 싶은 클래스에 Serializable을 붙여주면된다.
 
-Serializable 인터페이스를 구현한 클래스는 ObjectOutputStream을 통해 직렬화할 수 있다.
+Serializable 인터페이스를 구현한 클래스는 ObjectOutputStream.writeObject 메서드를 통해 직렬화할 수 있다.
 
 ```java
 public final void writeObject(Object obj) throws IOException {
