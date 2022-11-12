@@ -8,24 +8,12 @@
 ```java
 package java.io;
 
-public interface Serializable {
+public interface Serializable { 
 }
 ```
 자바에서 직렬화를 사용하고 싶은 클래스에 Serializable을 붙여주면된다.
 
-마커 애너테이션(item 39)이 등장하면서 마커 인터페이스를 사용안할것 같지만 마커 인터페이스가 마커 애너테이션보다 두 가지 더 나은점이 있다
-
-<br>
-
-### 마커 인터페이스 첫번째 장점
-
-마커 인터페이스는 이를 구현한 클래스의 인스턴스들을 구분하는 타입으로 쓸 수 있으나, 마커 애너테이션은 그렇지 않다.
-
-마커 인터페이스는 어엿한 타입이기 때문에, 마커 애너테이션을 사용했다면 런타임에야 발견될 오류를 컴파일타임에 잡을수 있다.
-
-하지만 마커인터페이스를 사용하고도 잘 사용하지 못한 예제가 있다.
-
-Serializable가 붙은 객체를 받아 자바 직렬화에 사용되는 ObjectOutputStream.writeObject 메서드는 당연히 인수로 받은 객체가 Serializable을 구현했을 거라고 가정한다.
+Serializable 인터페이스를 구현한 클래스는 ObjectOutputStream을 통해 직렬화할 수 있다.
 
 ```java
 public final void writeObject(Object obj) throws IOException {
@@ -44,9 +32,43 @@ public final void writeObject(Object obj) throws IOException {
 }
 ```
 
-그런데 이 메서드는 Serializable이 아닌 Object 객체를 받도록 설계되었다. 즉, 직렬화 할 수 없는 객체를 넘겨도 런타임에야 문제를 확인 할 수 있다.
+```java
+public void writeObject0(Object obj, boolean unshared) throws IOException {
+    ...
+    if (obj instanceof String) {
+        writeString((String) obj, unshared);
+    } else if (cl.isArray()) {
+        writeArray(obj, desc, unshared);
+    } else if (obj instanceof Enum) {
+        writeEnum((Enum<?>) obj, desc, unshared);
+    } else if (obj instanceof Serializable) {
+        writeOrdinaryObject(obj, desc, unshared);
+    } else {
+        if (extendedDebugInfo) {
+            throw new NotSerializableException(
+                cl.getName() + "\n" + debugInfoStack.toString());
+        } else {
+            throw new NotSerializableException(cl.getName());
+        }
+    }
+    ...
+}
+...
+```
 
-마커 인터페이스를 사용하는 주요 이유가 컴파일타임 오류 검출인데, 그 이점을 살리지 못한 것이다.
+Serializable 을 구현하지 않은 객체를 직렬화하려고하면 다음과 같은 코드에서 에러가 발생한다.
+
+이렇게 단순히 타입 체크 정도만하고 있어, 마커 인터페이스라 부르는 것이다.
+
+마커 애너테이션(item 39)이 등장하면서 마커 인터페이스를 사용 안 할것 같지만 마커 인터페이스가 두 가지 더 나은점이 있다.
+
+<br>
+
+### 마커 인터페이스 첫번째 장점
+
+마커 인터페이스는 이를 구현한 클래스의 인스턴스들을 구분하는 타입으로 쓸 수 있으나, 마커 애너테이션은 그렇지 않다.
+
+마커 인터페이스는 어엿한 타입이기 때문에, 마커 애너테이션을 사용했다면 런타임에야 발견될 오류를 컴파일타임에 잡을수 있다.
 
 <br>
 
@@ -54,11 +76,9 @@ public final void writeObject(Object obj) throws IOException {
 
 적용대상을 더 정밀하게 지정할 수 있다는 것이다.
 
-적용대상을(@Target)을 ElementType.TYPE으로 선언한 애너테이션은 모든 타입(클래스, 인터페이스, 열거 타입, 애너테이션)에 달수있다.
+적용대상을(@Target)을 ElementType.TYPE으로 선언한 애너테이션은 모든 타입(클래스, 인터페이스, 열거 타입, 애너테이션)에 달수있지만
 
-그런데 특정 인터페이스를 구현한 클래스에만 적용하고 싶은 마커가 있을때 그 인터페이스를 구현하면 된다.
-
-
+특정 인터페이스를 구현한 클래스에만 적용하고 싶을때는 마커 인터페이스를 사용하면 된다.
 
 <br>
 
@@ -67,6 +87,8 @@ public final void writeObject(Object obj) throws IOException {
 클래스와 인터페이스 외의 프로그램 요소(모듈, 패키지, 필드, 지역변수 등)에 마킹해야 할 때 애너테이션을 쓸수 밖에 없다.
 
 마커를 클래스나 인터페이스에 적용해야 하고 이 마킹이된 객체를 매개변수로 받는 메서드를 작성할 일이 있다면 마커 인터페이스를 사용해서 컴파일타임에 오류를 잡아낼 수 있다.
+
+위에서 살펴본 ObjectOutputStream.writeObject는 매개변수로 Serializable이 아닌 Object 객체를 받도록 설계되어 런타임시 문제를 확인하므로 이러한 마커 인터페이스의 장점을 살리지 못한 케이스이다.
 
 
 
