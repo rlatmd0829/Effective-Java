@@ -13,6 +13,8 @@ public interface Serializable {
 ```
 자바에서 직렬화를 사용하고 싶은 클래스에 Serializable을 붙여주면된다.
 
+> 직렬화 : 자바 시스템 내부에서 사용되는 Object 또는 Data를 외부의 자바 시스템에서도 사용할 수 있도록 byte 형태로 데이터를 변환하는 기술
+
 Serializable 인터페이스를 구현한 클래스는 ObjectOutputStream.writeObject 메서드를 통해 직렬화할 수 있다.
 
 ```java
